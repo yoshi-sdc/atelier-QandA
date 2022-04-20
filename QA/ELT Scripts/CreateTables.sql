@@ -1,4 +1,4 @@
-CREATE TABLE questions(
+CREATE TABLE IF NOT EXISTS questions(
   id SERIAL NOT NULL PRIMARY KEY,
   product_id INT NOT NULL,
   question_body TEXT NOT NULL,
@@ -8,7 +8,8 @@ CREATE TABLE questions(
   reported BOOLEAN NOT NULL,
   question_helpfulness INT NOT NULL
 );
-CREATE TABLE answers(
+
+CREATE TABLE IF NOT EXISTS answers(
   id SERIAL NOT NULL PRIMARY KEY,
   question_id INT references questions(id),
   body TEXT NOT NULL,
@@ -18,7 +19,8 @@ CREATE TABLE answers(
   reported BOOLEAN NOT NULL,
   helpfulness INT NOT NULL
 );
-CREATE TABLE photos(
+
+CREATE TABLE IF NOT EXISTS photos(
   id SERIAL NOT NULL PRIMARY KEY,
   answer_id INT references answers(id),
   url TEXT NOT NULL
