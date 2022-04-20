@@ -1,0 +1,25 @@
+{
+  "name": "atelier-qanda",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "pg:init": "pg_ctlcluster init QA",
+    "pg:start": "pg_ctlcluster QA start",
+    "pg:stop": "pg_ctlcluster QA stop"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yoshi-sdc/atelier-QandA.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yoshi-sdc/atelier-QandA/issues"
+  },
+  "homepage": "https://github.com/yoshi-sdc/atelier-QandA#readme",
+  "dependencies": {
+    "pg": "^8.7.3"
+  }
+}
