@@ -11,76 +11,81 @@ const pool = new Pool({
   port: process.env.PGPORT
 })
 
-pool.connect();
-
-// query for all questions
+pool.connect((err, client, release) => {
+  if (err) {
+    return console.error('Erro acquiring client', err);
+  }
+});
 
 // function that takes a callback to send result to client
 async function getAll(product_id, page, count, callback) {
   var finalResponse = {product_id: product_id}
-  // var allQuestions =
-  //   `SELECT questions.id, questions.question_body, questions.question_date, questions.asker_name, questions.question_helpfulness, questions.reported, answers.id, answers.body FROM questions
-  //   INNER JOIN answers ON answers.question_id=questions.id
-  //   INNER JOIN photos ON photos.answer_id=answers.id
-  //   WHERE product_id=${product_id}`;
+  const skipped = (page - 1) * count;
   var allQuestions =
-  `SELECT questions.id, questions.question_body, questions.question_date, questions.asker_name, questions.question_helpfulness, questions.reported FROM questions
-  WHERE product_id=${product_id}`;
-    // var allQuestions =
-    // `SELECT id, url FROM photos
-    // WHERE answer_id=5`;
-  // var allQuestions = `SELECT id, question_body, question_date, asker_name, question_helpfulness, reported FROM questions WHERE product_id=${product_id}`;
+  `WITH q AS (
+    SELECT *
+    FROM questions q
+    WHERE product_id=${product_id} AND q.q_id > ${skipped}
+    ORDER BY q.q_id
+    LIMIT ${count})
+  SELECT *
+  FROM q
+  JOIN answers a
+  ON a.question_id=q.q_id
+  LEFT JOIN photos p
+  ON p.answer_id=a.a_id
+  WHERE q.reported=false AND a.reported=false
+  ORDER BY q.q_id`;
   await pool.query(allQuestions)
-    .then ((res) => {
-      const questions = res.rows;
+  .then ((res) => {
+    const data = res.rows;
+    var results = [];
+    var lastQ;
+    // iterate through data
+    for (let i = 0; i < data.length; i++) {
+      // if question id not already seen
+      const current = data[i];
+      if (!lastQ || lastQ['question_id'] !== current['q_id']) {
+        // make new object
+        var questionObj = {
+          question_id: current['q_id'],
+          question_body: current['question_body'],
+          question_date: current['question_date'],
+          asker_name: current['asker_name'],
+          question_helpfulness: current['question_helpfulness'],
+          reported: false,
+          answers: {}
+        }
+        lastQ = questionObj;
+        results.push(questionObj);
+      }
+      // if answer has not been seen before
+      if (!lastQ.answers['a_id'])
+        // create new answer object
+        var answerObj = {
+          id: current['a_id'],
+          body: current['body'],
+          date: current['date'],
+          answerer_name: current['answerer_name'],
+          answerer_email: current['answerer_email'],
+          helpfulness: current['helpfulness'],
+          photos: []
+        }
+        lastQ.answers['a_id'] = answerObj;
+      // photos are always going to be unique, so if it exists, push it into answer's photos
+      if (current['p_id']) {
+        var photoObj = {
+          id: current['p_id'],
+          url: current['url']
+        }
+          lastQ.answers['a_id'].photos.push(photoObj);
+      }
+    }
+    finalResponse['results'] = results;
+    callback(finalResponse);
     })
     .catch(err => console.error('Error querying all questions', err))
   }
 
   module.exports.getAll = getAll;
-  // // iterate over rows and assign answers = result of all answers query
-  // const questions = res.rows;
-  // finalResponse.results = [];
-  // for (let i = 0; i < questions.length; i++) {
-  //   const question = questions[i];
-  //   // weed out for reported questions
-  //   var validQuestions = 0;
-  //   if (!question.reported) {
-  //     validQuestions += 1;
-  //     question['question_id'] = question.id;
-  //     delete question.id;
-  //     var allAnswers = `SELECT id, body, date, answerer_name, helpfulness FROM answers WHERE question_id=${question['question_id']}`;
-  //     // var allAnswers = `SELECT * FROM answers WHERE question_id=${question.id}`;
-  //     pool.query(allAnswers)
-  //     .then((res) => {
-  //       const answers = res.rows;
-  //       // iterate over answers to get photos property of answers
-  //       for (let j = 0; j < answers.length; j++) {
-  //         const answer = answers[j];
-  //         question.answers = {};
-  //         // weed out for reported answers
-  //         if (!answer.reported) {
-  //           var id = answer.id;
-  //           question.answers[id] = answer;
-  //           var allPhotos = `SELECT id, url FROM photos WHERE answer_id=${answer.id}`;
-  //           pool.query(allPhotos)
-  //             .then((res) => {
-  //               const photos = res.rows;
-  //               answer.photos = photos | [];
-  //               if (j === answers.length - 1) {
-  //                 finalResponse.results.push(question);
-  //               }
-  //             })
-  //             .catch(err => console.error('Error querying all photos', err))
-  //             .then ((res) => {
-  //               if (finalResponse.results.length === validQuestions) {
-  //                 callback(finalResponse);
-  //               }
-  //             })
-  //           }
-  //       }
-  //     })
-  //     .catch(err => console.error('Error querying all answers', err))
-  //   }
-  // }
 

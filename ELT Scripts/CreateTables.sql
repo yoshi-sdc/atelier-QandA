@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS questions(
-  id SERIAL NOT NULL PRIMARY KEY,
+  q_id SERIAL NOT NULL PRIMARY KEY,
   product_id INT NOT NULL,
   question_body TEXT NOT NULL,
   question_date BIGINT NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS questions(
 );
 
 CREATE TABLE IF NOT EXISTS answers(
-  id SERIAL NOT NULL PRIMARY KEY,
+  a_id SERIAL NOT NULL PRIMARY KEY,
   question_id INT references questions(id),
   body TEXT NOT NULL,
   date BIGINT NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS answers(
 );
 
 CREATE TABLE IF NOT EXISTS photos(
-  id SERIAL NOT NULL PRIMARY KEY,
+  p_id SERIAL NOT NULL PRIMARY KEY,
   answer_id INT references answers(id),
   url TEXT NOT NULL
 );
