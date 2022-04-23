@@ -25,6 +25,7 @@
   "devDependencies": {
     "@babel/core": "^7.17.9",
     "@babel/preset-env": "^7.16.11",
-    "babel-preset-airbnb": "^5.0.0"
+    "babel-preset-airbnb": "^5.0.0",
+    "jest": "^27.5.1"
   }
 }

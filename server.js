@@ -40,7 +40,7 @@ app.get('/qa/questions/:question_id/answers', async (req, res) => {
   }
 })
 
-app.post('qa/questions', async (req, res) => {
+app.post('/qa/questions', async (req, res) => {
   try {
     // call database with product id, page, count, and callback to send results
     await psql.addQuestion(req.body.product_id, req.body.body, req.body.name, req.body.email, (data) => {
@@ -58,6 +58,7 @@ app.put('/qa/questions/:question_id/helpful', async (req, res) => {
       res.sendStatus(204);
   } catch (err) {
     console.log('Error putting question helpfulness from server', err);
+    res.sendStatus(400);
   }
 })
 
@@ -67,10 +68,11 @@ app.put('/qa/questions/:question_id/report', async (req, res) => {
       res.sendStatus(204);
   } catch (err) {
     console.log('Error putting question report from server', err);
+    res.sendStatus(400);
   }
 })
 
-app.post('qa/questions/:question_id/answers', async (req, res) => {
+app.post('/qa/questions/:question_id/answers', async (req, res) => {
   try {
     const question_id = req.params.question_id;
     await psql.addAnswer(question_id, req.body.body, req.body.name, req.body.email, req.body.photos, (data) => {
@@ -88,6 +90,7 @@ app.put('/qa/answers/:answer_id/helpful', async (req, res) => {
       res.sendStatus(204);
   } catch (err) {
     console.log('Error putting answer helpfulness from server', err);
+    res.sendStatus(400);
   }
 })
 
@@ -97,6 +100,7 @@ app.put('/qa/answers/:answer_id/report', async (req, res) => {
       res.sendStatus(204);
   } catch (err) {
     console.log('Error putting answer report from server', err);
+    res.sendStatus(400);
   }
 })
 
