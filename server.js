@@ -40,43 +40,65 @@ app.get('/qa/questions/:question_id/answers', async (req, res) => {
   }
 })
 
-app.post('qa/questions/:question_id/answers', async (req, res) => {
+app.post('qa/questions', async (req, res) => {
   try {
-    const question_id = req.params.question_id;
     // call database with product id, page, count, and callback to send results
-    await psql.addAnswer(question_id, req.body.body, req.body.name, req.body.email, req.body.photos, (data) => {
-      res.status(201);
+    await psql.addQuestion(req.body.product_id, req.body.body, req.body.name, req.body.email, (data) => {
+      res.sendStatus(201);
     })
   } catch (err) {
-    console.log('Error getting answers from server', err);
+    console.log('Error posting question from server', err);
     res.sendStatus(400);
   }
 })
 
-// app.put('/questions/:question_id/helpful', (req, res) => {
-//   // use req.query.question_id
-//   res.send('marking question as helpful');
-// })
+app.put('/qa/questions/:question_id/helpful', async (req, res) => {
+  try {
+    await psql.helpfulQuestion(req.query.question_id)
+      res.sendStatus(204);
+  } catch (err) {
+    console.log('Error putting question helpfulness from server', err);
+  }
+})
 
-// app.put('/questions/:question_id/report', (req, res) => {
-//   // use req.query.question_id
-//   res.send('reporting question');
-// })
+app.put('/qa/questions/:question_id/report', async (req, res) => {
+  try {
+    await psql.reportQuestion(req.query.question_id)
+      res.sendStatus(204);
+  } catch (err) {
+    console.log('Error putting question report from server', err);
+  }
+})
 
-// app.post('/questions/:question_id/answers', (req, res) => {
-//   // use req.query.question_id, req.body.body / name / email / photos
-//   res.send('adding answer');
-// })
+app.post('qa/questions/:question_id/answers', async (req, res) => {
+  try {
+    const question_id = req.params.question_id;
+    await psql.addAnswer(question_id, req.body.body, req.body.name, req.body.email, req.body.photos, (data) => {
+      res.sendStatus(201);
+    })
+  } catch (err) {
+    console.log('Error posting answer from server', err);
+    res.sendStatus(400);
+  }
+})
 
-// app.put('/questions/:answer_id/helpful', (req, res) => {
-//   // use req.query.answer_id
-//   res.send('marking answer as helpful');
-// })
+app.put('/qa/answers/:answer_id/helpful', async (req, res) => {
+  try {
+    await psql.helpfulAnswer(req.query.answer_id)
+      res.sendStatus(204);
+  } catch (err) {
+    console.log('Error putting answer helpfulness from server', err);
+  }
+})
 
-// app.put('/questions/:answer_id/report', (req, res) => {
-//   // use req.query.answer_id
-//   res.send('reporting answer');
-// })
+app.put('/qa/answers/:answer_id/report', async (req, res) => {
+  try {
+    await psql.reportAnswer(req.query.answer_id)
+      res.sendStatus(204);
+  } catch (err) {
+    console.log('Error putting answer report from server', err);
+  }
+})
 
 
 
