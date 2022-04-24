@@ -13,36 +13,29 @@ const pool = new Pool({
 
 pool.connect((err, client, release) => {
   if (err) {
-    return console.error('Erro acquiring client', err);
+    return console.error('Error acquiring client', err);
   }
 });
 
-// function that takes a callback to send result to client
+// NEED TO FIGURE OUT HOW TO LIMIT AND OFFSET
 async function getAll(product_id, page, count, callback) {
   try {
     const skipped = (page - 1) * count;
     const allQuestions =
-    `SELECT json_agg(json_build_object('question_id', q_id, 'question_body', question_body, 'question_date', question_date, 'asker_name', asker_name,
+    `SELECT product_id, json_agg(json_build_object('question_id', q_id, 'question_body', question_body, 'question_date', TO_TIMESTAMP(question_date / 1000), 'asker_name', asker_name,
       'question_helpfulness', question_helpfulness, 'reported', reported, 'answers',
       (SELECT json_object_agg(a_id,
-        json_build_object('id', a_id, 'body', body, 'date', date, 'answerer_name', answerer_name, 'helpfulness', helpfulness, 'photos',
+        json_build_object('id', a_id, 'body', body, 'date', TO_TIMESTAMP(date / 1000), 'answerer_name', answerer_name, 'helpfulness', helpfulness, 'photos',
           (SELECT array_agg(url) FROM photos WHERE answer_id=a_id)))
       FROM answers a
-      WHERE question_id=5 AND a.reported=false))) AS results
+      WHERE question_id=q_id AND a.reported=false))) AS results
     FROM questions q
     WHERE product_id=${product_id} AND q.reported=false
-    GROUP BY product_id
-    LIMIT ${count}
-    OFFSET ${skipped}
-    `
-
+    GROUP BY product_id`
     await pool.query(allQuestions)
       .then((res) => {
         const results = res.rows;
-        var response = {
-          product_id: product_id
-        };;
-        callback(results)
+        callback(results[0])
       })
   } catch(err) {
     console.error('Error querying all questions', err)
@@ -53,7 +46,7 @@ async function getAnswers(q_id, page, count, callback) {
   try {
     const skipped = (page - 1) * count;
     const allAnswers =
-    `SELECT a_id AS answer_id, body, date, answerer_name, helpfulness,
+    `SELECT a_id AS answer_id, body, TO_TIMESTAMP(date / 1000), answerer_name, helpfulness,
       (SELECT json_agg(json_build_object('id', p_id, 'url', url))
       FROM photos WHERE answer_id=a_id) AS photos
     FROM answers a
@@ -82,8 +75,11 @@ async function addQuestion(product_id, body, name, email) {
     `INSERT INTO questions
       (product_id, question_body, question_date, asker_name, asker_email, reported, question_helpfulness)
     VALUES
-      (${product_id}, ${body}, extract('epoch' from CURRENT_TIMESTAMP)::bigint, ${name}, ${email}, false, 0)`;
+      (${product_id}, '${body}', EXTRACT(EPOCH from CURRENT_TIMESTAMP)::bigint * 1000, '${name}', '${email}', false, 0)
+      RETURNING q_id`;
     await pool.query(addQuestion)
+      .then((res) => {
+      })
   } catch (err) {
     console.error('Error adding question to database', err);
   }
@@ -114,37 +110,28 @@ async function reportQuestion(question_id) {
 }
 
 async function addAnswer(question_id, body, name, email, photos) {
-  try{
-  // if answer seq out of sync
-    // run queries to fix
-  // add answer associated with question
-  const addAnswer =
-  `INSERT INTO answers
-    (question_id, body, date, answerer_name, answerer_email, reported, helpfulness)
-  VALUES
-    (${question_id}, ${body}, extract('epoch' from CURRENT_TIMESTAMP)::bigint, ${name}, ${email}, false, 0)
-  RETURNING a_id`;
-  await pool.query(addAnswer)
-    .then((res) => {
-      var answerId = res.rows;
-      if (photos.length > 0) {
-        var photoVals = ''
-        for (let i = 0; i < photos.length; i++) {
-          if (i === photos.length - 1) {
-            photoVals.concat(`(${answerId}, ${photos[i]})`)
-          } else {
-            photoVals.concat(`(${answerId}, ${photos[i]}), `)
+  try {
+    const addAnswer =
+    `INSERT INTO answers
+      (question_id, body, date, answerer_name, answerer_email, reported, helpfulness)
+    VALUES
+      (${question_id}, '${body}', EXTRACT(EPOCH from CURRENT_TIMESTAMP)::bigint * 1000, '${name}', '${email}', false, 0)
+    RETURNING a_id`;
+    await pool.query(addAnswer)
+      .then((res) => {
+        const answerId = res.rows[0]['a_id'];
+        if (photos.length > 0) {
+          for (let i = 0; i < photos.length; i++) {
+            const url = photos[i];
+            const addPhotos =
+            `INSERT INTO photos
+            (answer_id, url)
+            VALUES (${answerId}, ${url})`;
+            pool.query(addPhotos)
           }
         }
-        const addPhotos =
-        `INSERT INTO photos
-          (answer_id, url)
-        VALUES
-          ${photoVals}`
-        pool.query(addPhotos)
-        .catch(err => console.error('Error adding photos', err))
-      }
-    })
+      })
+    .catch(err => console.error('Error adding photos', err))
   // add photos (maybe use spread operator to add all photos at once)
   } catch(err) {
     console.error('Error adding answer to database', err);
