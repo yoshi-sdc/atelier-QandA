@@ -126,12 +126,12 @@ async function addAnswer(question_id, body, name, email, photos) {
             const addPhotos =
             `INSERT INTO photos
             (answer_id, url)
-            VALUES (${answerId}, ${url})`;
+            VALUES (${answerId}, '${url}')`;
             pool.query(addPhotos)
+              .catch(err => console.error('Error adding photos', err))
           }
         }
       })
-    .catch(err => console.error('Error adding photos', err))
   // add photos (maybe use spread operator to add all photos at once)
   } catch(err) {
     console.error('Error adding answer to database', err);

@@ -15,5 +15,6 @@ describe('Get answers route', function() {
     const res = await request(app).get('/qa/questions/5/answers')
       expect(res.statusCode).toBe(200)
       expect(res.body.question).toBe('5')
+      expect(res.body.results).ToBeTruthy() // why is this not a function!? it says it is in the docs...
   })
 })
