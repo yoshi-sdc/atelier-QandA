@@ -5,6 +5,8 @@ const app = express();
 const psql = require('./database.js');
 const port = process.env.SERVERPORT;
 
+var router = express.Router();
+
 app.use(express.json());
 
 app.get('/qa/questions', async (req, res) => {
@@ -104,8 +106,8 @@ app.put('/qa/answers/:answer_id/report', async (req, res) => {
 
 
 
-// app.listen(port, () => {
-//   console.log(`Listening on port ${port}`);
-// })
+app.listen(port, () => {
+  console.log(`Listening on port ${port}`);
+})
 
 module.exports = app;

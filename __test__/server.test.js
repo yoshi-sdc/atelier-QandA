@@ -26,16 +26,13 @@ describe('Get answers route', function() {
 describe('Post question route', function() {
   test('responds to posting a question', async () => {
     const res = await request(app)
-      .post('/qa/questions/8/answers')
+      .post('/qa/questions')
       .send({
-        "body": "Testing posting an answer",
+        "body": "Testing posting a question",
         "name": "Anomnomus",
         "email": "test@gmail.com",
-        "photos": ["https://images.unsplash.com/photo-1530519729491-aea5b51d1ee1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1651&q=80",
-          "https://images.unsplash.com/photo-1511127088257-53ccfcc769fa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80",
-          "https://images.unsplash.com/photo-1500603720222-eb7a1f997356?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1653&q=80"
-        ]
-      })
+        "product_id": 8
+    })
       expect(res.statusCode).toBe(201)
   })
 })
@@ -56,6 +53,23 @@ describe('Put question route for reported', function() {
   })
 })
 
+describe('Post answer route', function() {
+  test('responds to posting an answer', async () => {
+    const res = await request(app)
+      .post('/qa/questions/8/answers')
+      .send({
+        "body": "Testing posting an answer",
+        "name": "Anomnomus",
+        "email": "test@gmail.com",
+        "photos": ["https://images.unsplash.com/photo-1530519729491-aea5b51d1ee1?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1651&q=80",
+          "https://images.unsplash.com/photo-1511127088257-53ccfcc769fa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1650&q=80",
+          "https://images.unsplash.com/photo-1500603720222-eb7a1f997356?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1653&q=80"
+        ]
+      })
+      expect(res.statusCode).toBe(201)
+  })
+})
+
 describe('Put answer route for helpfulness', function() {
   test('responds to a put request to mark an answer helpful', async () => {
     const res = await request(app)
@@ -65,7 +79,7 @@ describe('Put answer route for helpfulness', function() {
 })
 
 describe('Put answer route for reported', function() {
-  test('responds to a put request report a question', async () => {
+  test('responds to a put request report an answer', async () => {
     const res = await request(app)
       .put('/qa/answers/54/report')
       expect(res.statusCode).toBe(204)
