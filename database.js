@@ -126,7 +126,7 @@ async function addAnswer(question_id, body, name, email, photos) {
       (${question_id}, '${body}', EXTRACT(EPOCH from CURRENT_TIMESTAMP)::bigint * 1000, '${name}', '${email}', false, 0)
     RETURNING a_id`;
     const client = await pool.connect();
-    await client.query(allQuestions)
+    await client.query(addAnswer)
       .then((res) => {
         client.release();
         const answerId = res.rows[0]['a_id'];

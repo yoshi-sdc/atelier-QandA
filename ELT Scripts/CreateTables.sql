@@ -8,10 +8,11 @@ CREATE TABLE IF NOT EXISTS questions(
   reported BOOLEAN NOT NULL,
   question_helpfulness INT NOT NULL
 );
+CREATE INDEX IF NOT EXIST questions_product_id ON questions(product_id);
 
 CREATE TABLE IF NOT EXISTS answers(
   a_id SERIAL NOT NULL PRIMARY KEY,
-  question_id INT references questions(q_id),
+  question_id INT REFERENCES questions(q_id),
   body TEXT NOT NULL,
   date BIGINT NOT NULL,
   answerer_name TEXT NOT NULL,
@@ -20,10 +21,13 @@ CREATE TABLE IF NOT EXISTS answers(
   helpfulness INT NOT NULL
 );
 
+CREATE INDEX IF NOT EXIST answers_question_id ON answers(question_id);
+
 CREATE TABLE IF NOT EXISTS photos(
   p_id SERIAL NOT NULL PRIMARY KEY,
-  answer_id INT references answers(a_id),
+  answer_id INT REFERENCES answers(a_id),
   url TEXT NOT NULL
 );
 
+CREATE INDEX IF NOT EXIST photos_answer_id ON photos(answer_id);
 
