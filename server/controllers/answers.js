@@ -1,4 +1,4 @@
-const models = require('../models');
+const models = require('../models/answers.js');
 const app = require('../app.js');
 
 exports.getAnswers = async (req, res) => {
@@ -27,7 +27,7 @@ exports.addAnswer = async (req, res) => {
   }
 }
 
-exports.helpfuAnswer = async (req, res) => {
+exports.helpfulAnswer = async (req, res) => {
   try {
     await models.helpfulAnswer(req.params.answer_id)
     res.status(204).send('Answer marked as helpful.');
@@ -37,7 +37,7 @@ exports.helpfuAnswer = async (req, res) => {
   }
 }
 
-exports.helpfuAnswer = async (req, res) => {
+exports.reportAnswer = async (req, res) => {
   try {
     await models.reportAnswer(req.params.answer_id)
     res.status(204).send('Answer reported.');
