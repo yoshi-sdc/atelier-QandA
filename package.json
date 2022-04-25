@@ -2,9 +2,8 @@
   "name": "atelier-qanda",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "start": "nodemon server.js",
+    "start": "nodemon ./server/app.js",
     "test": "jest"
   },
   "repository": {

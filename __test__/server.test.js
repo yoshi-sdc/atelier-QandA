@@ -1,6 +1,6 @@
 import request from 'supertest';
 import express from 'express';
-const app = require('../server.js');
+const app = require('../app.js');
 
 
 describe('Get questions route', function() {
