@@ -11,12 +11,6 @@ const pool = new Pool({
   port: process.env.PGPORT
 })
 
-pool.connect((err, client, release) => {
-  if (err) {
-    return console.error('Error acquiring client', err);
-  }
-});
-
 // NEED TO FIGURE OUT HOW TO LIMIT AND OFFSET
 async function getAll(product_id, page, count, callback) {
   try {
@@ -32,8 +26,10 @@ async function getAll(product_id, page, count, callback) {
     FROM questions q
     WHERE product_id=${product_id} AND q.reported=false
     GROUP BY product_id`
-    await pool.query(allQuestions)
+    const client = await pool.connect();
+    await client.query(allQuestions)
       .then((res) => {
+        client.release();
         const results = res.rows;
         callback(results[0])
       })
@@ -53,8 +49,10 @@ async function getAnswers(q_id, page, count, callback) {
     WHERE question_id=${q_id} AND reported=false
     LIMIT ${count}
     OFFSET ${skipped}`
-    await pool.query(allAnswers)
+    const client = await pool.connect();
+    await client.query(allAnswers)
       .then((res) => {
+        client.release();
         var results = res.rows
         const response = {
           question: q_id,
@@ -77,9 +75,11 @@ async function addQuestion(product_id, body, name, email) {
     VALUES
       (${product_id}, '${body}', EXTRACT(EPOCH from CURRENT_TIMESTAMP)::bigint * 1000, '${name}', '${email}', false, 0)
       RETURNING q_id`;
-    await pool.query(addQuestion)
-      .then((res) => {
-      })
+    const client = await pool.connect();
+    await client.query(addQuestion)
+      .then(() => {
+        client.release();
+    })
   } catch (err) {
     console.error('Error adding question to database', err);
   }
@@ -91,7 +91,11 @@ async function helpfulQuestion(question_id) {
     `UPDATE questions
     SET question_helpfulness = question_helpfulness + 1
     WHERE q_id=${question_id}`;
-    await pool.query(helpfulQ)
+    const client = await pool.connect();
+    await client.query(helpfulQ)
+      .then(() => {
+        client.release();
+      })
   } catch (err) {
     console.error('Error marking question as helpful in db', err);
   }
@@ -103,7 +107,11 @@ async function reportQuestion(question_id) {
     `UPDATE questions
     SET reported = true
     WHERE q_id=${question_id}`;
-    await pool.query(reportQ)
+    const client = await pool.connect();
+    await client.query(reportQ)
+      .then(() => {
+        client.release();
+      })
   } catch (err) {
     console.error('Error reporting question in db', err);
   }
@@ -117,8 +125,10 @@ async function addAnswer(question_id, body, name, email, photos) {
     VALUES
       (${question_id}, '${body}', EXTRACT(EPOCH from CURRENT_TIMESTAMP)::bigint * 1000, '${name}', '${email}', false, 0)
     RETURNING a_id`;
-    await pool.query(addAnswer)
+    const client = await pool.connect();
+    await client.query(allQuestions)
       .then((res) => {
+        client.release();
         const answerId = res.rows[0]['a_id'];
         if (photos.length > 0) {
           for (let i = 0; i < photos.length; i++) {
@@ -144,7 +154,11 @@ async function helpfulAnswer(answer_id) {
     `UPDATE answers
     SET helpfulness = helpfulness + 1
     WHERE a_id=${answer_id}`;
-    await pool.query(helpfulA)
+    const client = await pool.connect();
+    await client.query(helpfulA)
+      .then(() => {
+        client.release();
+      })
   } catch (err) {
     console.error('Error marking answer as helpful in db', err);
   }
@@ -156,7 +170,11 @@ async function reportAnswer(answer_id) {
     `UPDATE answers
     SET reported = true
     WHERE a_id=${answer_id}`;
-    await pool.query(reportA)
+    const client = await pool.connect();
+    await client.query(reportA)
+      .then(() => {
+        client.release();
+      })
   } catch (err) {
     console.error('Error reporting answer in db', err);
   }
