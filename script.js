@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
@@ -5,13 +6,13 @@ export const options = {
   scenarios: {
     constant_request_rate: {
       executor: 'constant-arrival-rate',
-      rate: 1000,
+      rate: 100,
       timeUnit: '1s',
       duration: '1m',
       preAllocatedVUs: 20,
-      maxVUs: 10000
-    }
-  }
+      maxVUs: 10000,
+    },
+  },
 };
 
 // Get questions: `http://localhost:3000/qa/questions?product_id=${Math.floor(Math.random() * 99999)}`
@@ -33,13 +34,12 @@ export const options = {
 //   sleep(1);
 // }
 
-
 export default function () {
-  const url = `http://localhost:3000/qa/answers/${Math.floor(Math.random() * 99999)}/helpful`;
+  const url = `http://ec2-54-215-29-134.us-west-1.compute.amazonaws.com:80/qa/questions?product_id=${Math.floor(Math.random() * 99999)}`;
 
-  let res = http.put(url);
+  const res = http.get(url);
   check(res, {
-    'status was 204': (r) => r.status === 204
+    'status was 200': (r) => r.status === 200,
   });
   sleep(1);
 }

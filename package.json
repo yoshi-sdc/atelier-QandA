@@ -5,6 +5,7 @@
   "scripts": {
     "start": "nodemon ./server/app.js",
     "test": "jest",
+    "lint": "eslint",
     "prod": "node ./server/app.js"
   },
   "repository": {
@@ -20,6 +21,7 @@
   "homepage": "https://github.com/yoshi-sdc/atelier-QandA#readme",
   "dependencies": {
     "dotenv": "^16.0.0",
+    "eslint-config-airbnb": "^19.0.4",
     "express": "^4.17.3",
     "pg": "^8.7.3"
   },
@@ -27,6 +29,7 @@
     "@babel/core": "^7.17.9",
     "@babel/preset-env": "^7.16.11",
     "babel-preset-airbnb": "^5.0.0",
+    "eslint": "^8.14.0",
     "jest": "^27.5.1",
     "supertest": "^6.2.2"
   }

@@ -88,11 +88,4 @@ module.exports = {
       console.error('Error reporting answer in db', err);
     }
   }
-}
-
-
-
-
-
-
-
+};
