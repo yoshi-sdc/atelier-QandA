@@ -1,6 +1,5 @@
 /* eslint-disable camelcase */
 const models = require('../models/answers');
-const app = require('../app');
 
 exports.getAnswers = async (req, res) => {
   try {
@@ -19,8 +18,14 @@ exports.getAnswers = async (req, res) => {
 
 exports.addAnswer = async (req, res) => {
   try {
-    const question_id = parseInt(req.params.question_id);
-    await models.addAnswer(question_id, req.body.body, req.body.name, req.body.email, req.body.photos)
+    const question_id = parseInt(req.params.question_id, 10);
+    await models.addAnswer(
+      question_id,
+      req.body.body,
+      req.body.name,
+      req.body.email,
+      req.body.photos,
+    );
     res.status(201).send('Answer added.');
   } catch (err) {
     console.log('Error posting answer from server', err);
@@ -30,7 +35,7 @@ exports.addAnswer = async (req, res) => {
 
 exports.helpfulAnswer = async (req, res) => {
   try {
-    await models.helpfulAnswer(req.params.answer_id)
+    await models.helpfulAnswer(req.params.answer_id);
     res.status(204).send('Answer marked as helpful.');
   } catch (err) {
     console.log('Error putting answer helpfulness from server', err);
@@ -40,11 +45,10 @@ exports.helpfulAnswer = async (req, res) => {
 
 exports.reportAnswer = async (req, res) => {
   try {
-    await models.reportAnswer(req.params.answer_id)
+    await models.reportAnswer(req.params.answer_id);
     res.status(204).send('Answer reported.');
   } catch (err) {
     console.log('Error putting answer report from server', err);
     res.sendStatus(400);
   }
 };
-

@@ -1,6 +1,6 @@
 const router = require('express').Router();
-const question = require('./controllers/questions.js');
-const answer = require('./controllers/answers.js');
+const question = require('./controllers/questions');
+const answer = require('./controllers/answers');
 
 router.get('/questions', question.getAll);
 
